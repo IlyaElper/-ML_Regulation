@@ -613,3 +613,23 @@ class SBS():
         y_pred=self.estimator.predict(X_test[:,indices])
         score=self.scoring(y_test,y_pred)
         return score
+def perform_tests(df):
+    # Continuous Variables
+    transform_var_list = ['age', 'annual_income', 'interest_rate', 'delay_from_due_date', 'changed_credit_limit', 'outstanding_debt','credit_utilization_ratio', 'credit_history_monts', 'num_of_delayed_payment', 'total_emi_per_month', 'amount_invested_monthly', 'monthly_balance']
+
+    summary = []
+
+    # Chi-square test for categorical variables
+    for col in df.columns[:-1]:
+        if col in transform_var_list:
+            t_stat, pvalue = f_classif(df[[col]], df["credit_score"])
+            summary.append([col, t_stat[0], pvalue[0]])
+        else :
+            cross = pd.crosstab(index=df[col], columns=df["credit_score"])
+            t_stat, pvalue, *_ = chi2_contingency(cross)
+            summary.append([col, t_stat, pvalue])
+
+    return pd.DataFrame(
+        data=summary,
+        columns=["column", 't-statistic', "p-value"]
+    )
